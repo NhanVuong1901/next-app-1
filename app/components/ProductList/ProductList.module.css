@@ -1,0 +1,8 @@
+.tbl{
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.tr:hover{
+    background-color: aqua;
+}
