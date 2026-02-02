@@ -36,7 +36,9 @@ export async function PUT(request: NextRequest, { params }: Props) {
   //   );
   // }
 
-  return NextResponse.json({ id: 3, name: body.name });
+  const validData = validation.data;
+
+  return NextResponse.json({ id: 3, name: validData.name });
 }
 
 export async function DELETE(request: NextRequest, { params }: Props) {
