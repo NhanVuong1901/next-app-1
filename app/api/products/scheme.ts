@@ -7,5 +7,5 @@ export const schema = z.object({
 
 export const schemaPatch = z.object({
   name: z.string().trim().min(3).optional(),
-  price: z.int().min(1).max(100),
+  price: z.int().min(1).max(100).optional(),
 });
