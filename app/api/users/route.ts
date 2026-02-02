@@ -16,5 +16,12 @@ export async function POST(request: NextRequest) {
 
   const validData = validation.data;
 
-  return NextResponse.json({ id: 3, name: validData.name });
+  const newUser = await prisma.user.create({
+    data: {
+      name: validData.name,
+      email: validData.email,
+    },
+  });
+
+  return NextResponse.json(newUser, { status: 201 });
 }
