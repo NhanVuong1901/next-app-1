@@ -3,13 +3,13 @@ import { schema } from "../scheme";
 import { prisma } from "@/prisma/lib/prisma";
 
 interface Props {
-  params: Promise<{ id: number }>;
+  params: Promise<{ id: string }>;
 }
 
 export async function GET(request: NextRequest, { params }: Props) {
   const { id } = await params;
   const user = await prisma.user.findUnique({
-    where: { id: id },
+    where: { id: parseInt(id) },
   });
 
   if (!user) {
@@ -20,8 +20,11 @@ export async function GET(request: NextRequest, { params }: Props) {
 
 export async function PUT(request: NextRequest, { params }: Props) {
   const { id } = await params;
+  const user = await prisma.user.findUnique({
+    where: { id: parseInt(id) },
+  });
 
-  if (id > 10) {
+  if (!user) {
     return NextResponse.json({ message: "User Not Found" });
   }
   const body = await request.json();
@@ -36,15 +39,13 @@ export async function PUT(request: NextRequest, { params }: Props) {
 
 export async function DELETE(request: NextRequest, { params }: Props) {
   const { id } = await params;
+  const user = await prisma.user.findUnique({
+    where: { id: parseInt(id) },
+  });
 
-  if (id > 10) {
+  if (!user) {
     return NextResponse.json({ message: "User Not Found" });
   }
-
-  //   return NextResponse.json(
-  //     { server: `User with id ${id} has been deleted` },
-  //     { status: 200 },
-  //   );
 
   return new NextResponse(null, { status: 204 });
 }
