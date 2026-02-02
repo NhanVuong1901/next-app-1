@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { schema } from "../scheme";
+import { prisma } from "@/prisma/lib/prisma";
 
 interface Props {
   params: Promise<{ id: number }>;
@@ -7,11 +8,14 @@ interface Props {
 
 export async function GET(request: NextRequest, { params }: Props) {
   const { id } = await params;
+  const user = await prisma.user.findUnique({
+    where: { id: id },
+  });
 
-  if (id > 10) {
-    return NextResponse.json({ message: "User Not Found" });
+  if (!user) {
+    return NextResponse.json({ message: "User Not Found" }, { status: 404 });
   }
-  return NextResponse.json({ id: id, name: "Malaysia" });
+  return NextResponse.json(user);
 }
 
 export async function PUT(request: NextRequest, { params }: Props) {
@@ -20,24 +24,13 @@ export async function PUT(request: NextRequest, { params }: Props) {
   if (id > 10) {
     return NextResponse.json({ message: "User Not Found" });
   }
-
   const body = await request.json();
 
   const validation = schema.safeParse(body);
-
-  if (validation.success === false) {
+  if (!validation.success)
     return NextResponse.json(validation.error.issues, { status: 400 });
-  }
-  
+
   const validData = validation.data;
-  // if (typeof body.name !== "string" || body.name.trim().length === 0) {
-  //   return NextResponse.json(
-  //     { message: "Name must be string and cannot be empty" },
-  //     { status: 400 }
-  //   );
-  // }
-
-
   return NextResponse.json({ id: 3, name: validData.name });
 }
 
