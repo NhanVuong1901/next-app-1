@@ -1,60 +1,92 @@
 import { NextRequest, NextResponse } from "next/server";
-import { schema } from "../scheme";
+import { schema, schemaPatch } from "../scheme";
+import { prisma } from "@/prisma/lib/prisma";
 
 interface Props {
-  params: Promise<{ id: number }>;
+  params: Promise<{ id: string }>;
 }
 
 export async function GET(request: NextRequest, { params }: Props) {
   const { id } = await params;
+  const product = await prisma.product.findUnique({
+    where: { id: parseInt(id) },
+  });
 
-  if (id > 10) {
-    return NextResponse.json({ message: "Product Not Found" });
+  if (!product) {
+    return NextResponse.json({ message: "Product Not Found" }, { status: 404 });
   }
-  return NextResponse.json({ id: id, name: "Oppo" });
+  return NextResponse.json(product);
 }
 
 export async function PUT(request: NextRequest, { params }: Props) {
   const { id } = await params;
+  const product = await prisma.product.findUnique({
+    where: { id: parseInt(id) },
+  });
 
-  if (id > 10) {
+  if (!product) {
     return NextResponse.json({ message: "Product Not Found" });
   }
-
   const body = await request.json();
 
   const validation = schema.safeParse(body);
-
-  if (validation.success === false) {
+  if (!validation.success)
     return NextResponse.json(validation.error.issues, { status: 400 });
-  }
 
   const validData = validation.data;
-  // if (typeof body.name !== "string" || body.name.trim().length === 0) {
-  //   return NextResponse.json(
-  //     { message: "Name must be string and cannot be empty" },
-  //     { status: 400 }
-  //   );
-  // }
 
-  return NextResponse.json({
-    id: 3,
-    name: validData.name,
-    price: validData.price,
+  const updatedProduct = await prisma.product.update({
+    where: { id: parseInt(id) },
+    data: {
+      name: validData.name,
+      price: validData.price,
+    },
   });
+
+  return NextResponse.json(updatedProduct, { status: 200 });
 }
 
 export async function DELETE(request: NextRequest, { params }: Props) {
   const { id } = await params;
+  const product = await prisma.product.findUnique({
+    where: { id: parseInt(id) },
+  });
 
-  if (id > 10) {
+  if (!product) {
     return NextResponse.json({ message: "Product Not Found" });
   }
 
-  //   return NextResponse.json(
-  //     { server: `User with id ${id} has been deleted` },
-  //     { status: 200 },
-  //   );
+  await prisma.product.delete({
+    where: { id: parseInt(id) },
+  });
 
   return new NextResponse(null, { status: 204 });
+}
+
+export async function PATCH(request: NextRequest, { params }: Props) {
+  const { id } = await params;
+  const product = await prisma.product.findUnique({
+    where: { id: parseInt(id) },
+  });
+
+  if (!product) {
+    return NextResponse.json({ message: "Product Not Found" });
+  }
+  const body = await request.json();
+
+  const validation = schemaPatch.safeParse(body);
+  if (!validation.success)
+    return NextResponse.json(validation.error.issues, { status: 400 });
+
+  const validData = validation.data;
+
+  const updatedProduct = await prisma.product.update({
+    where: { id: parseInt(id) },
+    data: {
+      name: validData.name || product.name,
+      price: validData.price || product.price,
+    },
+  });
+
+  return NextResponse.json(updatedProduct, { status: 200 });
 }
