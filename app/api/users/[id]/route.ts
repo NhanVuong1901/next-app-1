@@ -28,7 +28,8 @@ export async function PUT(request: NextRequest, { params }: Props) {
   if (validation.success === false) {
     return NextResponse.json(validation.error.issues, { status: 400 });
   }
-
+  
+  const validData = validation.data;
   // if (typeof body.name !== "string" || body.name.trim().length === 0) {
   //   return NextResponse.json(
   //     { message: "Name must be string and cannot be empty" },
@@ -36,7 +37,6 @@ export async function PUT(request: NextRequest, { params }: Props) {
   //   );
   // }
 
-  const validData = validation.data;
 
   return NextResponse.json({ id: 3, name: validData.name });
 }
